@@ -18,21 +18,38 @@ bool dequeContainsElement(deque<int> deque, int element) {
     return false;
 }
 
-void bfs(struct Graph* graph, int startVertex, int target) {
+deque<int> bfs(struct Graph* graph, int startVertex, int target) {
     deque<int> open;
     deque<int> closed;
     open.push_back(startVertex);
     while (true) {
         if (open.empty()) {
             printf_s("Target cannot be reached.\n");
-            return;
+            closed.clear();
+            return closed;
         }
         int x = open.front();
         closed.push_back(x);
         open.pop_front();
         if (x == target) {
             printf_s("Target reached.\n");
-            return;
+            deque<int> path;
+            path.push_back(x);
+            int lastAdded = x;
+            for (int i = closed.size() - 2; i >= 0; i--) {
+                int v = closed[i];
+                if (v == startVertex) break;
+                Node* adjList = graph->adjLists[lastAdded];
+                while (adjList) {
+                    if (adjList->vertex == v) {
+                        path.push_front(v);
+                        lastAdded = v;
+                        break;
+                    }
+                    adjList = adjList->next;
+                }
+            }
+            return path;
         }
         Node* sons = graph->adjLists[x];
         while (sons) {
@@ -44,22 +61,38 @@ void bfs(struct Graph* graph, int startVertex, int target) {
     }
 }
 
-void dfs(struct Graph* graph, int startVertex, int target) {
+deque<int> dfs(struct Graph* graph, int startVertex, int target) {
     deque<int> open;
     deque<int> closed;
     open.push_back(startVertex);
     while (true) {
         if (open.empty()) {
             printf_s("Target cannot be reached.\n");
-            return;
+            closed.clear();
+            return closed;
         }
         int x = open.front();
         closed.push_back(x);
         open.pop_front();
         if (x == target) {
             printf_s("Target reached.\n");
-
-            return;
+            deque<int> path;
+            path.push_back(x);
+            int lastAdded = x;
+            for (int i = closed.size() - 2; i >= 0; i--) {
+                int v = closed[i];
+                if (v == startVertex) break;
+                Node* adjList = graph->adjLists[lastAdded];
+                while (adjList) {
+                    if (adjList->vertex == v) {
+                        path.push_front(v);
+                        lastAdded = v;
+                        break;
+                    }
+                    adjList = adjList->next;
+                }
+            }
+            return path;
         }
         Node* sons = graph->adjLists[x];
         while (sons) {
@@ -97,9 +130,17 @@ int main(int argc, char* argv[]) {
                     scanf_s("%d", &target);
                     if (target) {
                         printf_s("BFS\n");
-                        bfs(graph, start, target - 1);
-                        printf_s("DFS\n");
-                        dfs(graph, start, target - 1);
+                        deque<int> path = bfs(graph, start - 1, target - 1);
+                        printf_s("Path: ");
+                        for (int i = 0; i < path.size(); i++) {
+                            printf_s("%d ", path[i] + 1);
+                        }
+                        printf_s("\nDFS\n");
+                        path = dfs(graph, start - 1, target - 1);
+                        printf_s("Path: ");
+                        for (int i = 0; i < path.size(); i++) {
+                            printf_s("%d ", path[i] + 1);
+                        }
                     } else {
                         printf_s("No target");
                         return 1;
